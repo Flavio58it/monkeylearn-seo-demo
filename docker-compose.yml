@@ -1,0 +1,11 @@
+seo:
+  build: .
+  command: python server.py
+  volumes:
+    - ".:/seo-demo"
+  ports:
+    - "5000:5000"
+  environment:
+    DEBUG: "True"
+  env_file:
+    - "./seo-demo.env"

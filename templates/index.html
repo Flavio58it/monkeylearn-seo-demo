@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-wrapper">
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header page-scroll">
+        <button class="navbar-toggle" data-target="#bs-example-navbar-collapse-1" data-toggle="collapse" type="button">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        </button>
+        <h1>
+        <a class="page-scroll" href="http://www.tryolabs.com/">
+          Tryolabs
+        </a>
+        </h1>
+      </div>
+      <div class="navbar-header page-scroll navbar-subtitle"><a href="http://www.monkeylearn.com/">MonkeyLearn's</a>  Keyword Comparison Extractor</div>
+    </div>
+  </nav>
+
+  <div class="container main-container">
+    <div class="row">
+      <div class="col-md-12">
+        <form class="search-box form-inline" action="/search" method="get">
+          <div class="form-group col-md-3">
+            <input type="text" class="form-control" id="domain" name="domain" placeholder="Your URL">
+          </div>
+          <div class="form-group col-md-3">
+            <input type="text" class="form-control" id="search" name="search" placeholder="Search Query">
+          </div>
+          <div class="form-group col-md-3">
+            <select class="form-control" name="tld">
+              {% for country in app.COUNTRIES %}
+                <option value="{{ country.tld }}">{{ country.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Compare Keywords</button>
+        </form>
+
+      </div>
+    </div>
+      {% if describe %}
+        {% include "desc.html" %}
+      {% endif %}
+      {% if error %}
+        <div class="error">
+          {{ error }}
+        </div>
+      {% endif %}
+      {% if results %}
+        <div class="row search-terms">
+          <div class="col-md-3">
+            <p><strong>Website:</strong> {{ domain }}</p>
+          </div>
+          <div class="col-md-9">
+            <p><strong>Search term:</strong> {{ search }}</p>
+          </div>
+        </div>
+        <div class="row search-results">
+          <div class="col-md-12">
+            <p><strong>Search results:</strong></p>
+            <ul>
+              {% for result in results.search_results %}
+                <li>
+                  <a href="{{ result }}">
+                    {{ result }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-5">
+            <h2>Website Keywords</h2>
+            <table id="website-results">
+              <thead>
+                <tr>
+                  <td>Keyword</td>
+                  <td>Relevance</td>
+                </tr>
+              </thead>
+              <tbody>
+                {% for keyword in results.website_keywords %}
+                  <tr>
+                    <td class="keyword">
+                      {{ keyword.string | truncate(30) }}
+                    </td>
+                    <td class="relevance">
+                      {{ keyword.relevance | round(precision=3) }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-7">
+            <h2>Search Keywords</h2>
+            <table id="search-results">
+              <thead>
+                <tr>
+                  <td>Keyword</td>
+                  <td>Average Relevance</td>
+                  <td>Sites Found</td>
+                  <td>Score</td>
+                </tr>
+              </thead>
+              <tbody>
+                {% for keyword in results.keywords %}
+                  <tr>
+                    <td class="keyword">
+                      {{ keyword.string | truncate(30) }}
+                    </td>
+                    <td class="relevance">
+                      {{ keyword.relevance | round(precision=3) }}
+                    </td>
+                    <td class="sites-found" data-sort="{{ keyword.fraction_sites_found }}" data-toggle="popover" data-placement="bottom" data-container="body" data-trigger="hover" data-html="true"
+                    data-content="<ul>{% for site in keyword.sites_found %}<li><a href='{{ site }}'>{{ site | truncate(30) }}</a></li>{% endfor %}</ul>">
+                      {{ keyword.number_sites_found }}/{{ results.total_sites }}
+                    </td>
+                    <td class="score">
+                      {{ keyword.score | round(precision=3) }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <script>
+         $(document).ready(function(){
+             $('#website-results').DataTable({
+                 paging: false,
+                 searching: false,
+                 bInfo: false,
+                 order: [[1,'desc']]
+             });
+             $('#search-results').DataTable({
+                 paging: false,
+                 searching: false,
+                 bInfo: false,
+                 order: [[3,'desc']]
+             });
+         });
+        </script>
+      {% endif %}
+  </div>
+</div>
+{% endblock %}

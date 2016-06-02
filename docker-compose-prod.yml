@@ -1,0 +1,10 @@
+seo:
+  container_name: seo-demo
+  build: .
+  expose:
+    - "5000"
+  volumes:
+    - "/seo-demo"
+  env_file:
+    - "./seo-demo.env"
+  restart: always
